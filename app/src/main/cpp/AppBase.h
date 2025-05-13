@@ -63,6 +63,7 @@ namespace cube {
 
         VkExtent2D displaySize_;
         VkFormat displayFormat_;
+        VkSurfaceTransformFlagBitsKHR pretransformFlag;
 
         // array of frame buffers and views
         std::vector<VkImage> displayImages_;
@@ -119,6 +120,10 @@ namespace cube {
         void CreateVulkanDevice(ANativeWindow *pWindow);
         void CreateSwapChain();
 
+        std::vector<VkSemaphore> imageAvailableSemaphores;
+        std::vector<VkSemaphore> renderFinishedSemaphores;
+        std::vector<VkFence> inFlightFences;
+
     protected:
         bool InitGUI();
 
@@ -130,7 +135,7 @@ namespace cube {
 
         VulkanDeviceInfo m_device;
         VulkanSwapchainInfo m_swapChain;
-        VulkanRenderInfo render;
+        VulkanRenderInfo m_render;
         VulkanBufferInfo buffers;
         VulkanGfxPipelineInfo gfxPipeline;
         VkDebugUtilsMessengerEXT debugMessenger;
@@ -138,7 +143,7 @@ namespace cube {
         const std::vector<const char *> deviceExtensions = {
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-        std::vector<const char *> getRequiredExtensions(bool enableValidation);
+        std::vector<const char *> getRequiredExtensions() const;
 
         bool isDeviceSuitable(VkPhysicalDevice device);
 
@@ -149,6 +154,11 @@ namespace cube {
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
 
+        void createImageViews();
+
+        void createRenderPass();
+
+        void createFramebuffers();
     };
 }
 
