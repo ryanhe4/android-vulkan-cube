@@ -273,7 +273,6 @@ namespace cube {
         createUniformBuffers();
         createDescriptorPool();
         createDescriptorSets();
-        createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
         createCommandBuffer();
@@ -800,27 +799,19 @@ namespace cube {
  * a 4x4 rotation matrix specified by the descriptorSetLayout. This is required
  * in order to render a rotated scene when the device has been rotated.
  */
-    void AppBase::createGraphicsPipeline() {
-        auto vertShaderCode =
-                LoadBinaryFileToVector("shaders/shader.vert.spv", assetManager);
-        auto fragShaderCode =
-                LoadBinaryFileToVector("shaders/shader.frag.spv", assetManager);
-
-        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-        VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
-
+    void AppBase::createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader) {
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = vertShaderModule;
+        vertShaderStageInfo.module = vertexShader;
         vertShaderStageInfo.pName = "main";
 
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = fragShaderModule;
+        fragShaderStageInfo.module = pixelShader;
         fragShaderStageInfo.pName = "main";
 
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
@@ -925,11 +916,10 @@ namespace cube {
 
         VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                            nullptr, &graphicsPipeline));
-        vkDestroyShaderModule(device, fragShaderModule, nullptr);
-        vkDestroyShaderModule(device, vertShaderModule, nullptr);
     }
 
-    VkShaderModule AppBase::createShaderModule(const std::vector<uint8_t> &code) {
+    VkShaderModule AppBase::createShaderModule(const char* file_path) {
+        const std::vector<uint8_t> &code = LoadBinaryFileToVector(file_path, assetManager);
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();

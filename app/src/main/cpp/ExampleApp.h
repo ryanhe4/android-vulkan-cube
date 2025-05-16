@@ -29,6 +29,8 @@ namespace cube {
 
     protected:
         bool m_usePerspectiveProjection = true;
+        std::unique_ptr<VkShaderModule> m_vertexShader;
+        std::unique_ptr<VkShaderModule> m_pixelShader;
     };
 
 }

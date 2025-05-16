@@ -13,6 +13,13 @@ namespace cube {
         if(!AppBase:: Initialize()) {
             return false;
         }
+
+        m_vertexShader = make_unique<VkShaderModule>(createShaderModule("shaders/shader.vert.spv"));
+        m_pixelShader = make_unique<VkShaderModule>(createShaderModule("shaders/shader.frag.spv"));
+
+        // TODO: DELETE SHADER
+        AppBase::createGraphicsPipeline(*m_vertexShader, *m_pixelShader);
+
         return true;
     }
 

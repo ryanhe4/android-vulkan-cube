@@ -24,6 +24,7 @@
 #include <set>
 #include <string>
 #include <array>
+#include <memory>
 
 namespace cube {
 
@@ -113,8 +114,6 @@ namespace cube {
 
         void createDescriptorSetLayout();
 
-        void createGraphicsPipeline();
-
         void createFramebuffers();
 
         void createCommandPool();
@@ -134,8 +133,6 @@ namespace cube {
         std::vector<const char *> getRequiredExtensions(bool enableValidation);
 
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-
-        VkShaderModule createShaderModule(const std::vector<uint8_t> &code);
 
         uint32_t findMemoryType(uint32_t typeFilter,
                                 VkMemoryPropertyFlags properties);
@@ -163,7 +160,6 @@ namespace cube {
         const std::vector<const char *> deviceExtensions = {
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME};
         std::unique_ptr<ANativeWindow, ANativeWindowDeleter> window;
-        AAssetManager *assetManager;
 
         VkInstance instance;
         VkDebugUtilsMessengerEXT debugMessenger;
@@ -203,6 +199,12 @@ namespace cube {
         void onOrientationChange();
 
         void updateUniformBuffer(uint32_t currentImage);
+
+        AAssetManager *assetManager;
+
+        VkShaderModule createShaderModule(const char* file_path);
+
+        void createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader);
 
     public:
         VkDevice device;
