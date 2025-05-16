@@ -10,6 +10,10 @@
 #include <android/native_window_jni.h>
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <vulkan/vulkan.h>
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
@@ -19,6 +23,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <array>
 
 namespace cube {
 
@@ -35,40 +40,14 @@ namespace cube {
     }                                         \
   } while (0)
 
-    struct VulkanDeviceInfo {
-        bool initialized_;
-        bool enableValidationLayers = false;
+    const int MAX_FRAMES_IN_FLIGHT = 2;
 
-        VkInstance instance_;
-        VkPhysicalDevice gpuDevice_;
-        VkDevice device_;
-
-        VkSurfaceKHR surface_;
-        VkQueue graphicsQueue_;
-        VkQueue presentQueue_;
-
-        const std::vector<const char *> validationLayers = {
-                "VK_LAYER_KHRONOS_validation"};
-
+    struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
         std::optional<uint32_t> presentFamily;
         bool isComplete() {
             return graphicsFamily.has_value() && presentFamily.has_value();
         }
-    };
-
-    struct VulkanSwapchainInfo {
-        VkSwapchainKHR swapchain_;
-        uint32_t swapchainLength_;
-
-        VkExtent2D displaySize_;
-        VkFormat displayFormat_;
-        VkSurfaceTransformFlagBitsKHR pretransformFlag;
-
-        // array of frame buffers and views
-        std::vector<VkImage> displayImages_;
-        std::vector<VkImageView> displayViews_;
-        std::vector<VkFramebuffer> framebuffers_;
     };
 
     struct SwapChainSupportDetails {
@@ -77,26 +56,20 @@ namespace cube {
         std::vector<VkPresentModeKHR> presentModes;
     };
 
-    struct VulkanRenderInfo {
-        VkRenderPass renderPass_;
-        VkCommandPool cmdPool_;
-        VkCommandBuffer *cmdBuffer_;
-        uint32_t cmdBufferLen_;
-        VkSemaphore semaphore_;
-        VkFence fence_;
+    struct ANativeWindowDeleter {
+        void operator()(ANativeWindow *window) { ANativeWindow_release(window); }
     };
 
-    struct VulkanGfxPipelineInfo {
-        VkPipelineLayout layout_;
-        VkPipelineCache cache_;
-        VkPipeline pipeline_;
+    struct UniformBufferObject {
+        glm::mat4 mvp;
     };
 
-    struct VulkanBufferInfo {
-        VkBuffer vertexBuf_;
-    };
 
     class AppBase {
+    public:
+        bool initialized = false;
+        uint32_t currentFrame = 0;
+        bool orientationChanged = false;
     public:
         AppBase(android_app *state);
 
@@ -112,53 +85,101 @@ namespace cube {
 
         virtual void Render() = 0;
 
-        bool checkValidationLayerSupport();
-
-        static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+        void reset(ANativeWindow *newWindow, AAssetManager *newManager);
+        void cleanup();
 
     private:
-        void CreateVulkanDevice(ANativeWindow *pWindow);
-        void CreateSwapChain();
+        void initVulkan();
+        void cleanupSwapChain();
 
-        std::vector<VkSemaphore> imageAvailableSemaphores;
-        std::vector<VkSemaphore> renderFinishedSemaphores;
-        std::vector<VkFence> inFlightFences;
+        void createInstance();
+        void createSurface();
+        void setupDebugMessenger();
+        void pickPhysicalDevice();
+        void createLogicalDeviceAndQueue();
+        void createSwapChain();
+        void createImageViews();
+        void createRenderPass();
+        void createDescriptorSetLayout();
+        void createGraphicsPipeline();
+        void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffer();
+        void createSyncObjects();
+        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+        bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+        bool isDeviceSuitable(VkPhysicalDevice device);
+        bool checkValidationLayerSupport();
+        std::vector<const char *> getRequiredExtensions(bool enableValidation);
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        VkShaderModule createShaderModule(const std::vector<uint8_t> &code);
+
+        uint32_t findMemoryType(uint32_t typeFilter,
+                                VkMemoryPropertyFlags properties);
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+                          VkMemoryPropertyFlags properties, VkBuffer &buffer,
+                          VkDeviceMemory &bufferMemory);
+        void createUniformBuffers();
+        void createDescriptorPool();
+        void createDescriptorSets();
+        void establishDisplaySizeIdentity();
+
+        android_app *app;
+
+        bool enableValidationLayers = false;
+
+        const std::vector<const char *> validationLayers = {
+                "VK_LAYER_KHRONOS_validation"};
+        const std::vector<const char *> deviceExtensions = {
+                VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+        std::unique_ptr<ANativeWindow, ANativeWindowDeleter> window;
+        AAssetManager *assetManager;
+
+        VkInstance instance;
+        VkDebugUtilsMessengerEXT debugMessenger;
+
+        VkSurfaceKHR surface;
+
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+        std::vector<VkImage> swapChainImages;
+        VkFormat swapChainImageFormat;
+        VkExtent2D swapChainExtent;
+        VkExtent2D displaySizeIdentity;
+        std::vector<VkImageView> swapChainImageViews;
+        std::vector<VkFramebuffer> swapChainFramebuffers;
+        VkCommandPool commandPool;
+
+        VkRenderPass renderPass;
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkPipelineLayout pipelineLayout;
+        VkPipeline graphicsPipeline;
+
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
+
+        VkDescriptorPool descriptorPool;
+        std::vector<VkDescriptorSet> descriptorSets;
+
+        VkSurfaceTransformFlagBitsKHR pretransformFlag;
 
     protected:
         bool InitGUI();
+        void recreateSwapChain();
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void onOrientationChange();
+        void updateUniformBuffer(uint32_t currentImage);
+        
+        VkDevice device;
+        VkSwapchainKHR swapChain;
+        std::vector<VkCommandBuffer> commandBuffers;
 
-        bool InitVulkan();
+        std::vector<VkFence> inFlightFences;
+        std::vector<VkSemaphore> imageAvailableSemaphores;
+        std::vector<VkSemaphore> renderFinishedSemaphores;
 
-    public:
-        bool m_orientationChanged = false;
-        android_app *app;
-
-        VulkanDeviceInfo m_device;
-        VulkanSwapchainInfo m_swapChain;
-        VulkanRenderInfo m_render;
-        VulkanBufferInfo buffers;
-        VulkanGfxPipelineInfo gfxPipeline;
-        VkDebugUtilsMessengerEXT debugMessenger;
-
-        const std::vector<const char *> deviceExtensions = {
-                VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-        std::vector<const char *> getRequiredExtensions() const;
-
-        bool isDeviceSuitable(VkPhysicalDevice device);
-
-        void findQueueFamilies(VkPhysicalDevice device);
-
-        bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-
-
-        void createImageViews();
-
-        void createRenderPass();
-
-        void createFramebuffers();
+        VkQueue graphicsQueue;
+        VkQueue presentQueue;
     };
 }
 

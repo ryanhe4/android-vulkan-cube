@@ -23,31 +23,17 @@
 using namespace std;
 
 /*
- * Shared state for the app. This will be accessed within lifecycle callbacks
- * such as APP_CMD_START or APP_CMD_INIT_WINDOW.
- *
- * We store:
- * struct android_app - a pointer to the Android application handle
- *
- * vkt::HelloVK - a pointer to our (this) Vulkan application in order to call
- *  the rendering logic
- *
- * bool canRender - a flag which signals that we are ready to call the vulkan
- * rendering logic
- *
- */
-
-/*
  * Key events filter to GameActivity's android_native_app_glue. This sample does
  * not use/process any input events, return false for all input events so system
  * can still process them.
  */
-//extern "C" bool VulkanKeyEventFilter(const GameActivityKeyEvent *event) {
-//  return false;
-//}
-//extern "C" bool VulkanMotionEventFilter(const GameActivityMotionEvent *event) {
-//  return false;
-//}
+
+extern "C" bool VulkanKeyEventFilter(const GameActivityKeyEvent *event) {
+  return false;
+}
+extern "C" bool VulkanMotionEventFilter(const GameActivityMotionEvent *event) {
+  return false;
+}
 
 /*
  * Entry point required by the Android Glue library.

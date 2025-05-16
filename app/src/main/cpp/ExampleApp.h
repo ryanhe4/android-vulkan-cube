@@ -9,6 +9,10 @@
 
 #include "AppBase.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace cube {
 
     class ExampleApp : public AppBase {
@@ -22,7 +26,10 @@ namespace cube {
         virtual void Update(float dt) override;
 
         virtual void Render() override;
+
+    private:
     };
+
 }
 
 
