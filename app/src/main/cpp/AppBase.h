@@ -45,6 +45,7 @@ namespace cube {
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
         std::optional<uint32_t> presentFamily;
+
         bool isComplete() {
             return graphicsFamily.has_value() && presentFamily.has_value();
         }
@@ -86,43 +87,72 @@ namespace cube {
         virtual void Render() = 0;
 
         void reset(ANativeWindow *newWindow, AAssetManager *newManager);
+
         void cleanup();
 
     private:
         void initVulkan();
+
         void cleanupSwapChain();
 
         void createInstance();
+
         void createSurface();
+
         void setupDebugMessenger();
+
         void pickPhysicalDevice();
+
         void createLogicalDeviceAndQueue();
+
         void createSwapChain();
+
         void createImageViews();
+
         void createRenderPass();
+
         void createDescriptorSetLayout();
+
         void createGraphicsPipeline();
+
         void createFramebuffers();
+
         void createCommandPool();
+
         void createCommandBuffer();
+
         void createSyncObjects();
+
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+
         bool isDeviceSuitable(VkPhysicalDevice device);
+
         bool checkValidationLayerSupport();
+
         std::vector<const char *> getRequiredExtensions(bool enableValidation);
+
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
         VkShaderModule createShaderModule(const std::vector<uint8_t> &code);
 
         uint32_t findMemoryType(uint32_t typeFilter,
                                 VkMemoryPropertyFlags properties);
+
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
                           VkMemoryPropertyFlags properties, VkBuffer &buffer,
                           VkDeviceMemory &bufferMemory);
+
         void createUniformBuffers();
+
         void createDescriptorPool();
+
         void createDescriptorSets();
+
         void establishDisplaySizeIdentity();
+
+        void Present();
 
         android_app *app;
 
@@ -165,11 +195,16 @@ namespace cube {
 
     protected:
         bool InitGUI();
+
         void recreateSwapChain();
+
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
         void onOrientationChange();
+
         void updateUniformBuffer(uint32_t currentImage);
-        
+
+    public:
         VkDevice device;
         VkSwapchainKHR swapChain;
         std::vector<VkCommandBuffer> commandBuffers;
@@ -180,7 +215,10 @@ namespace cube {
 
         VkQueue graphicsQueue;
         VkQueue presentQueue;
+
+        uint32_t imageIndex;
     };
+
 }
 
 

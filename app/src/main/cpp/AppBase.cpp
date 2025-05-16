@@ -220,6 +220,8 @@ namespace cube {
                 if (source != nullptr) {
                     source->process(source->app, source);
                 }
+
+                LOGI("EVNET: %d",events);
             }
             ImGui_ImplVulkan_NewFrame();
             ImGui_ImplAndroid_NewFrame();
@@ -234,9 +236,9 @@ namespace cube {
             ImGui::End();
             ImGui::Render(); // 렌더링할 것들 기록 끝
 
-//          Update(ImGui::GetIO().DeltaTime); // 애니메이션 같은 변화
+            Update(ImGui::GetIO().DeltaTime); // 애니메이션 같은 변화
             Render();
-
+            Present();
         } while (app->destroyRequested == 0);
 
         return 0;
@@ -1206,5 +1208,48 @@ namespace cube {
 
             VK_CHECK(vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]));
         }
+    }
+
+    void AppBase::Present() {
+        // SwapChain
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
+        VkPipelineStageFlags waitStages[] = {
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+        VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+        VK_CHECK(vkQueueSubmit(graphicsQueue, 1, &submitInfo,
+                               inFlightFences[currentFrame]));
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = signalSemaphores;
+
+        VkSwapchainKHR swapChains[] = {swapChain};
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
+        presentInfo.pResults = nullptr;
+
+        VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
+        if (result == VK_SUBOPTIMAL_KHR) {
+            orientationChanged = true;
+        } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+        } else {
+            assert(result == VK_SUCCESS);  // failed to present swap chain image!
+        }
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 }
