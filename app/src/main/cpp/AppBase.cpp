@@ -151,18 +151,60 @@ namespace cube {
     }
 
     bool AppBase::InitGUI() {
-//        IMGUI_CHECKVERSION();
-//        ImGui::CreateContext();
-//        ImGuiIO &io = ImGui::GetIO();
-//        (void) io;
+        // 1: create descriptor pool for IMGUI
+        //  the size of the pool is very oversize, but it's copied from imgui demo
+        //  itself.
+        VkDescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                                              { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
 
-//        if (!ImGui_ImplVulkan_Init()) {
-//            return false;
-//        }
-//
-//        if (!ImGui_ImplAndroid_Init()) {
-//            return false;
-//        }
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        pool_info.maxSets = 1000;
+        pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+        pool_info.pPoolSizes = pool_sizes;
+
+        VkDescriptorPool imguiPool;
+        VK_CHECK(vkCreateDescriptorPool(device, &pool_info, nullptr, &imguiPool));
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void) io;
+        io.DisplaySize = ImVec2(float(displaySizeIdentity.width), float(displaySizeIdentity.height));
+        ImGui::StyleColorsLight();
+
+        if (!ImGui_ImplAndroid_Init(app->window)) {
+            return false;
+        }
+
+        // this initializes imgui for Vulkan
+
+        auto indices = findQueueFamilies(physicalDevice);
+        ImGui_ImplVulkan_InitInfo init_info = {};
+        init_info.Instance = instance;
+        init_info.PhysicalDevice = physicalDevice;
+        init_info.Device = device;
+        init_info.QueueFamily = indices.graphicsFamily.value();
+        init_info.Queue = graphicsQueue;
+        init_info.DescriptorPool = imguiPool;
+        init_info.MinImageCount = swapChainImages.size();
+        init_info.ImageCount = swapChainImages.size();
+        init_info.RenderPass = renderPass;
+        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+        if (!ImGui_ImplVulkan_Init(&init_info)) {
+            return false;
+        }
 
         return true;
     }
@@ -179,44 +221,40 @@ namespace cube {
                     source->process(source->app, source);
                 }
             }
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplAndroid_NewFrame();
 
-            g_appBase->Render();
+            ImGui::NewFrame();
+            ImGui::Begin("Scene Control");
+
+            // ImGui가 측정해주는 Framerate 출력
+            ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+            ImGui::GetIO().Framerate);
+            UpdateGUI(); // 추가적으로 사용할 GUI
+            ImGui::End();
+            ImGui::Render(); // 렌더링할 것들 기록 끝
+
+//          Update(ImGui::GetIO().DeltaTime); // 애니메이션 같은 변화
+            Render();
+
         } while (app->destroyRequested == 0);
 
-//            ImGui_ImplVulkan_NewFrame();
-//            ImGui_ImplAndroid_NewFrame();
-
-//            ImGui::NewFrame();
-//            ImGui::Begin("Scene Control");
-
-        // ImGui가 측정해주는 Framerate 출력
-//            ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-//                        ImGui::GetIO().Framerate);
-
-//            UpdateGUI(); // 추가적으로 사용할 GUI
-
-//            ImGui::End();
-//            ImGui::Render(); // 렌더링할 것들 기록 끝
-
-//            Update(ImGui::GetIO().DeltaTime); // 애니메이션 같은 변화
-
-//            Render(); // 우리가 구현한 렌더링
-
-//            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData()); // GUI 렌더링
-
-        // Switch the back buffer and the front buffer
-        //            // 주의: ImGui RenderDrawData() 다음에 Present() 호출
-        //            m_swapChain->Present(1, 0);
         return 0;
     }
 
     bool AppBase::Initialize() {
         initVulkan();
+        InitGUI();
         return true;
     }
 
     AppBase::~AppBase() {
         g_appBase = nullptr;
+
+        // Cleanup
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplAndroid_Shutdown();
+        ImGui::DestroyContext();
     }
 
     void AppBase::initVulkan() {
@@ -987,6 +1025,9 @@ namespace cube {
                                 0, nullptr);
 
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),commandBuffers[currentFrame]); // GUI 렌더링
+
         vkCmdEndRenderPass(commandBuffer);
         VK_CHECK(vkEndCommandBuffer(commandBuffer));
     }

@@ -18,7 +18,9 @@ namespace cube {
 
     void ExampleApp::Update(float dt) {}
 
-    void ExampleApp::UpdateGUI() {}
+    void ExampleApp::UpdateGUI() {
+        ImGui::Checkbox("usePerspectiveProjection", &m_usePerspectiveProjection);
+    }
 
     void ExampleApp::Render() {
         if (orientationChanged) {
@@ -44,6 +46,7 @@ namespace cube {
 
         recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
+        // SwapChain
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

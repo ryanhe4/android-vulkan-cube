@@ -27,7 +27,8 @@ namespace cube {
 
         virtual void Render() override;
 
-    private:
+    protected:
+        bool m_usePerspectiveProjection = true;
     };
 
 }
