@@ -16,7 +16,6 @@ namespace cube {
 * app can react to it.
 */
     void HandleCmd(android_app *app, int32_t cmd) {
-//        auto *engine = (VulkanEngine *) app->userData;
         switch (cmd) {
             case APP_CMD_START:
                 if (app->window != nullptr) {
@@ -43,6 +42,82 @@ namespace cube {
                 g_appBase->cleanup();
             default:
                 break;
+        }
+    }
+
+    void HandleInputEvents(struct android_app *app) {
+        auto inputBuf = android_app_swap_input_buffers(app);
+        if (inputBuf == nullptr) {
+            return;
+        }
+
+        LOGI("asd %f", inputBuf->motionEvents->precisionX);
+
+        for (uint64_t i = 0; i < inputBuf->motionEventsCount; ++i) {
+            GameActivityMotionEvent* motionEvent = &inputBuf->motionEvents[i];
+            const int32_t action = motionEvent->action;
+
+            // 포인터 인덱스 추출
+            const int32_t pointerIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+                    >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+
+            // 포인터 데이터 가져오기
+            GameActivityPointerAxes* pointer = &motionEvent->pointers[pointerIndex];
+            float x = GameActivityPointerAxes_getX(pointer);
+            float y = GameActivityPointerAxes_getY(pointer);
+
+            // ImGui에 터치 소스 설정
+            ImGuiIO& io = ImGui::GetIO();
+            io.AddMouseSourceEvent(ImGuiMouseSource_TouchScreen);
+
+            // 액션별 처리
+            switch (action & AMOTION_EVENT_ACTION_MASK) {
+                case AMOTION_EVENT_ACTION_DOWN:
+                case AMOTION_EVENT_ACTION_POINTER_DOWN:
+                    io.AddMousePosEvent(x, y);
+                    io.AddMouseButtonEvent(0, true); // 왼쪽 버튼 DOWN
+                    break;
+
+                case AMOTION_EVENT_ACTION_UP:
+                case AMOTION_EVENT_ACTION_POINTER_UP:
+                    io.AddMouseButtonEvent(0, false); // 왼쪽 버튼 UP
+                    break;
+
+                case AMOTION_EVENT_ACTION_MOVE:
+                    io.AddMousePosEvent(x, y);
+                    break;
+            }
+        }
+
+        // For the minimum, apps need to process the exit event (for example,
+        // listening to AKEYCODE_BACK). This sample has done that in the Kotlin side
+        // and not processing other input events, we just reset the event counter
+        // inside the android_input_buffer to keep app glue code in a working state.
+        android_app_clear_motion_events(inputBuf);
+        android_app_clear_motion_events(inputBuf);
+    }
+
+    extern "C" bool VulkanKeyEventFilter(const GameActivityKeyEvent *event) {
+        return false;
+    }
+    extern "C" bool VulkanMotionEventFilter(const GameActivityMotionEvent *event) {
+        switch (event->action) {
+            case AMOTION_EVENT_ACTION_DOWN: {
+                LOGI("motion Down %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
+                return true;
+            }
+            case AMOTION_EVENT_ACTION_UP: {
+                LOGI("motion UP %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
+                return true;
+            }
+            case AMOTION_EVENT_ACTION_MOVE: {
+                LOGI("motion MOVE %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
+                return true;
+            }
+            default: {
+                LOGI("motionevent %d", event->action);
+                return false;
+            }
         }
     }
 
@@ -147,6 +222,10 @@ namespace cube {
     AppBase::AppBase(struct android_app *state)
             : app{state} {
         app->onAppCmd = HandleCmd;
+
+        android_app_set_key_event_filter(state, VulkanKeyEventFilter);
+        android_app_set_motion_event_filter(state, VulkanMotionEventFilter);
+
         g_appBase = this;
     }
 
@@ -181,7 +260,11 @@ namespace cube {
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
         io.DisplaySize = ImVec2(float(displaySizeIdentity.width), float(displaySizeIdentity.height));
+        io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
+        io.FontGlobalScale = 2.5f;
+
         ImGui::StyleColorsLight();
+        ImGui::GetStyle().ScaleAllSizes(4.0f); // 터치 UI 확대
 
         if (!ImGui_ImplAndroid_Init(app->window)) {
             return false;
@@ -223,6 +306,9 @@ namespace cube {
 
                 LOGI("EVNET: %d",events);
             }
+
+            HandleInputEvents(app);
+
             ImGui_ImplVulkan_NewFrame();
             ImGui_ImplAndroid_NewFrame();
 

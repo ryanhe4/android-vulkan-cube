@@ -23,19 +23,6 @@
 using namespace std;
 
 /*
- * Key events filter to GameActivity's android_native_app_glue. This sample does
- * not use/process any input events, return false for all input events so system
- * can still process them.
- */
-
-extern "C" bool VulkanKeyEventFilter(const GameActivityKeyEvent *event) {
-  return false;
-}
-extern "C" bool VulkanMotionEventFilter(const GameActivityMotionEvent *event) {
-  return false;
-}
-
-/*
  * Entry point required by the Android Glue library.
  * This can also be achieved more verbosely by manually declaring JNI functions
  * and calling them from the Android application layer.
