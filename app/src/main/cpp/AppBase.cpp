@@ -51,8 +51,6 @@ namespace cube {
             return;
         }
 
-        LOGI("asd %f", inputBuf->motionEvents->precisionX);
-
         for (uint64_t i = 0; i < inputBuf->motionEventsCount; ++i) {
             GameActivityMotionEvent* motionEvent = &inputBuf->motionEvents[i];
             const int32_t action = motionEvent->action;
@@ -76,14 +74,17 @@ namespace cube {
                 case AMOTION_EVENT_ACTION_POINTER_DOWN:
                     io.AddMousePosEvent(x, y);
                     io.AddMouseButtonEvent(0, true); // 왼쪽 버튼 DOWN
+                    LOGI("AMOTION_EVENT_ACTION_DOWN");
                     break;
 
                 case AMOTION_EVENT_ACTION_UP:
                 case AMOTION_EVENT_ACTION_POINTER_UP:
                     io.AddMouseButtonEvent(0, false); // 왼쪽 버튼 UP
+                    LOGI("AMOTION_EVENT_ACTION_UP");
                     break;
 
                 case AMOTION_EVENT_ACTION_MOVE:
+                    LOGI("motion MOVE %f, %f", x, y);
                     io.AddMousePosEvent(x, y);
                     break;
             }
@@ -103,15 +104,12 @@ namespace cube {
     extern "C" bool VulkanMotionEventFilter(const GameActivityMotionEvent *event) {
         switch (event->action) {
             case AMOTION_EVENT_ACTION_DOWN: {
-                LOGI("motion Down %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
                 return true;
             }
             case AMOTION_EVENT_ACTION_UP: {
-                LOGI("motion UP %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
                 return true;
             }
             case AMOTION_EVENT_ACTION_MOVE: {
-                LOGI("motion MOVE %f, %f", event->pointers[0].rawX, event->pointers[0].rawY);
                 return true;
             }
             default: {
@@ -303,8 +301,6 @@ namespace cube {
                 if (source != nullptr) {
                     source->process(source->app, source);
                 }
-
-                LOGI("EVNET: %d",events);
             }
 
             HandleInputEvents(app);
