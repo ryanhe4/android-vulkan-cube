@@ -15,6 +15,12 @@
 
 namespace cube {
 
+    // 이 예제에서 사용하는 Vertex 정의
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec3 color;
+    };
+
     class ExampleApp : public AppBase {
     public:
         ExampleApp(android_app *app);
@@ -27,10 +33,17 @@ namespace cube {
 
         virtual void Render() override;
 
+        virtual void cleanup() override;
     protected:
         bool m_usePerspectiveProjection = true;
         std::unique_ptr<VkShaderModule> m_vertexShader;
         std::unique_ptr<VkShaderModule> m_pixelShader;
+
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
+
+        VkBuffer m_vertexBuffer;
+        VkDeviceMemory m_vertexBufferMemory;
     };
 
 }

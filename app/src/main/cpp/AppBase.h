@@ -28,6 +28,8 @@
 
 namespace cube {
 
+    using std::vector;
+
 #define LOG_TAG "hellovkjni"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__))
@@ -89,7 +91,7 @@ namespace cube {
 
         void reset(ANativeWindow *newWindow, AAssetManager *newManager);
 
-        void cleanup();
+        virtual void cleanup();
 
     private:
         void initVulkan();
@@ -132,8 +134,6 @@ namespace cube {
 
         std::vector<const char *> getRequiredExtensions(bool enableValidation);
 
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-
         uint32_t findMemoryType(uint32_t typeFilter,
                                 VkMemoryPropertyFlags properties);
 
@@ -141,14 +141,10 @@ namespace cube {
                           VkMemoryPropertyFlags properties, VkBuffer &buffer,
                           VkDeviceMemory &bufferMemory);
 
-        void createUniformBuffers();
-
         void createDescriptorPool();
 
-        void createDescriptorSets();
-
         void establishDisplaySizeIdentity();
-
+        void PreUpdate();
         void Present();
 
         android_app *app;
@@ -166,11 +162,8 @@ namespace cube {
 
         VkSurfaceKHR surface;
 
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
-        VkExtent2D swapChainExtent;
         VkExtent2D displaySizeIdentity;
         std::vector<VkImageView> swapChainImageViews;
         std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -178,46 +171,88 @@ namespace cube {
 
         VkRenderPass renderPass;
         VkDescriptorSetLayout descriptorSetLayout;
-        VkPipelineLayout pipelineLayout;
-        VkPipeline graphicsPipeline;
-
-        std::vector<VkBuffer> uniformBuffers;
-        std::vector<VkDeviceMemory> uniformBuffersMemory;
 
         VkDescriptorPool descriptorPool;
-        std::vector<VkDescriptorSet> descriptorSets;
-
-        VkSurfaceTransformFlagBitsKHR pretransformFlag;
 
     protected:
         bool InitGUI();
 
         void recreateSwapChain();
 
-        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void
+        beginRender(VkCommandBuffer commandBuffer, uint32_t imageIndex, VkClearValue clearColor);
 
         void onOrientationChange();
 
-        void updateUniformBuffer(uint32_t currentImage);
+        void updateUniformBuffer(UniformBufferObject &ubo, VkDeviceMemory &uniformBufferMemory) const;
+
+        void createDescriptorSets(vector<VkBuffer> uniformBuffers);
 
         AAssetManager *assetManager;
 
-        VkShaderModule createShaderModule(const char* file_path);
+        VkShaderModule createShaderModule(const char *file_path);
 
-        void createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader);
+        template<typename T_VERTEX>
+        void createVertexBuffer(const vector<T_VERTEX> &vertices, VkBuffer &vertexBuffer,
+                                VkDeviceMemory &vertexBufferMemory) {
+            // 버퍼 생성 정보 설정
+            VkBufferCreateInfo bufferInfo{};
+            bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+            bufferInfo.size = sizeof(T_VERTEX) * vertices.size(); // 총 버퍼 크기
+            bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; // 버텍스 버퍼 용도
+            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+            VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer));
+
+            VkMemoryRequirements memRequirements;
+            vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+            VkMemoryAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            allocInfo.allocationSize = memRequirements.size;
+            allocInfo.memoryTypeIndex =
+                    findMemoryType(memRequirements.memoryTypeBits,
+                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+            VK_CHECK(vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory));
+
+            vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+            void* data;
+            vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+            memcpy(data, vertices.data(), (size_t) bufferInfo.size);
+            vkUnmapMemory(device, vertexBufferMemory);
+        }
+
+        void createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader,
+                                    VkVertexInputBindingDescription vertextInputBinding,
+                                    std::array<VkVertexInputAttributeDescription, 2> attrDesc
+        );
+
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
+        void createUniformBuffers(std::vector<VkBuffer> &uniformBuffers,
+                                  std::vector<VkDeviceMemory> &uniformBuffersMemory);
+
+        std::vector<VkDescriptorSet> descriptorSets;
     public:
         VkDevice device;
         VkSwapchainKHR swapChain;
+        VkExtent2D swapChainExtent;
         std::vector<VkCommandBuffer> commandBuffers;
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+        VkSurfaceTransformFlagBitsKHR pretransformFlag;
 
         std::vector<VkFence> inFlightFences;
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
 
+        VkPipeline graphicsPipeline;
+        VkPipelineLayout pipelineLayout;
+
         VkQueue graphicsQueue;
         VkQueue presentQueue;
-
         uint32_t imageIndex;
     };
 

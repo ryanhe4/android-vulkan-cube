@@ -52,7 +52,7 @@ namespace cube {
         }
 
         for (uint64_t i = 0; i < inputBuf->motionEventsCount; ++i) {
-            GameActivityMotionEvent* motionEvent = &inputBuf->motionEvents[i];
+            GameActivityMotionEvent *motionEvent = &inputBuf->motionEvents[i];
             const int32_t action = motionEvent->action;
 
             // 포인터 인덱스 추출
@@ -60,12 +60,12 @@ namespace cube {
                     >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 
             // 포인터 데이터 가져오기
-            GameActivityPointerAxes* pointer = &motionEvent->pointers[pointerIndex];
+            GameActivityPointerAxes *pointer = &motionEvent->pointers[pointerIndex];
             float x = GameActivityPointerAxes_getX(pointer);
             float y = GameActivityPointerAxes_getY(pointer);
 
             // ImGui에 터치 소스 설정
-            ImGuiIO& io = ImGui::GetIO();
+            ImGuiIO &io = ImGui::GetIO();
             io.AddMouseSourceEvent(ImGuiMouseSource_TouchScreen);
 
             // 액션별 처리
@@ -148,6 +148,7 @@ namespace cube {
                 return "UNKNOWN";
         }
     }
+
     const char *toStringMessageType(VkDebugUtilsMessageTypeFlagsEXT s) {
         if (s == (VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
                   VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
@@ -198,7 +199,7 @@ namespace cube {
             VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
             const VkAllocationCallbacks *pAllocator,
             VkDebugUtilsMessengerEXT *pDebugMessenger) {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                 instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
@@ -210,7 +211,7 @@ namespace cube {
     static void DestroyDebugUtilsMessengerEXT(
             VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
             const VkAllocationCallbacks *pAllocator) {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                 instance, "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
             func(instance, debugMessenger, pAllocator);
@@ -231,23 +232,23 @@ namespace cube {
         // 1: create descriptor pool for IMGUI
         //  the size of the pool is very oversize, but it's copied from imgui demo
         //  itself.
-        VkDescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-                                              { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
+        VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
+                                             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}};
 
         VkDescriptorPoolCreateInfo pool_info = {};
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         pool_info.maxSets = 1000;
-        pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+        pool_info.poolSizeCount = (uint32_t) std::size(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
 
         VkDescriptorPool imguiPool;
@@ -257,7 +258,8 @@ namespace cube {
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void) io;
-        io.DisplaySize = ImVec2(float(displaySizeIdentity.width), float(displaySizeIdentity.height));
+        io.DisplaySize = ImVec2(float(displaySizeIdentity.width),
+                                float(displaySizeIdentity.height));
         io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
         io.FontGlobalScale = 2.5f;
 
@@ -297,7 +299,7 @@ namespace cube {
             android_poll_source *source;
 
             while ((ident = ALooper_pollAll(g_appBase->initialized ? 0 : -1, nullptr, &events,
-                                            (void **)&source)) >= 0) {
+                                            (void **) &source)) >= 0) {
                 if (source != nullptr) {
                     source->process(source->app, source);
                 }
@@ -313,13 +315,30 @@ namespace cube {
 
             // ImGui가 측정해주는 Framerate 출력
             ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-            ImGui::GetIO().Framerate);
+                        ImGui::GetIO().Framerate);
             UpdateGUI(); // 추가적으로 사용할 GUI
             ImGui::End();
             ImGui::Render(); // 렌더링할 것들 기록 끝
 
+            PreUpdate();
+
             Update(ImGui::GetIO().DeltaTime); // 애니메이션 같은 변화
+
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.flags = 0;
+            beginInfo.pInheritanceInfo = nullptr;
+
+            vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+            VK_CHECK(vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo));
+
             Render();
+
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),
+                                            commandBuffers[currentFrame]); // GUI 렌더링
+            vkCmdEndRenderPass(commandBuffers[currentFrame]);
+            VK_CHECK(vkEndCommandBuffer(commandBuffers[currentFrame]));
+
             Present();
         } while (app->destroyRequested == 0);
 
@@ -352,9 +371,7 @@ namespace cube {
         createImageViews();
         createRenderPass();
         createDescriptorSetLayout();
-        createUniformBuffers();
         createDescriptorPool();
-        createDescriptorSets();
         createFramebuffers();
         createCommandPool();
         createCommandBuffer();
@@ -403,10 +420,6 @@ namespace cube {
 
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-            vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
-        }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
@@ -457,9 +470,9 @@ namespace cube {
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-        for (const char *layerName : validationLayers) {
+        for (const char *layerName: validationLayers) {
             bool layerFound = false;
-            for (const auto &layerProperties : availableLayers) {
+            for (const auto &layerProperties: availableLayers) {
                 if (strcmp(layerName, layerProperties.layerName) == 0) {
                     layerFound = true;
                     break;
@@ -501,7 +514,7 @@ namespace cube {
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
-        createInfo.enabledExtensionCount = (uint32_t)requiredExtensions.size();
+        createInfo.enabledExtensionCount = (uint32_t) requiredExtensions.size();
         createInfo.ppEnabledExtensionNames = requiredExtensions.data();
         createInfo.pApplicationInfo = &appInfo;
 
@@ -511,7 +524,7 @@ namespace cube {
                     static_cast<uint32_t>(validationLayers.size());
             createInfo.ppEnabledLayerNames = validationLayers.data();
             populateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *) &debugCreateInfo;
         } else {
             createInfo.enabledLayerCount = 0;
             createInfo.pNext = nullptr;
@@ -524,7 +537,7 @@ namespace cube {
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
                                                extensions.data());
         LOGI("available extensions");
-        for (const auto &extension : extensions) {
+        for (const auto &extension: extensions) {
             LOGI("\t %s", extension.extensionName);
         }
     }
@@ -563,7 +576,7 @@ namespace cube {
                                                  queueFamilies.data());
 
         int i = 0;
-        for (const auto &queueFamily : queueFamilies) {
+        for (const auto &queueFamily: queueFamilies) {
             if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
             }
@@ -595,7 +608,7 @@ namespace cube {
         std::set<std::string> requiredExtensions(deviceExtensions.begin(),
                                                  deviceExtensions.end());
 
-        for (const auto &extension : availableExtensions) {
+        for (const auto &extension: availableExtensions) {
             requiredExtensions.erase(extension.extensionName);
         }
 
@@ -651,7 +664,7 @@ namespace cube {
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
 
-        for (const auto &device : devices) {
+        for (const auto &device: devices) {
             if (isDeviceSuitable(device)) {
                 physicalDevice = device;
                 break;
@@ -668,7 +681,7 @@ namespace cube {
         std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(),
                                                   indices.presentFamily.value()};
         float queuePriority = 1.0f;
-        for (uint32_t queueFamily : uniqueQueueFamilies) {
+        for (uint32_t queueFamily: uniqueQueueFamilies) {
             VkDeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = queueFamily;
@@ -725,7 +738,7 @@ namespace cube {
 
         auto chooseSwapSurfaceFormat =
                 [](const std::vector<VkSurfaceFormatKHR> &availableFormats) {
-                    for (const auto &availableFormat : availableFormats) {
+                    for (const auto &availableFormat: availableFormats) {
                         if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
                             availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                             return availableFormat;
@@ -881,7 +894,9 @@ namespace cube {
  * a 4x4 rotation matrix specified by the descriptorSetLayout. This is required
  * in order to render a rotated scene when the device has been rotated.
  */
-    void AppBase::createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader) {
+    void AppBase::createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader,
+                                         VkVertexInputBindingDescription vertextInputBinding,
+                                         std::array<VkVertexInputAttributeDescription, 2> attrDesc) {
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -902,10 +917,10 @@ namespace cube {
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.pVertexBindingDescriptions = nullptr;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &vertextInputBinding;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attrDesc.size());;
+        vertexInputInfo.pVertexAttributeDescriptions = attrDesc.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType =
@@ -926,7 +941,7 @@ namespace cube {
         rasterizer.lineWidth = 1.0f;
 
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f;
@@ -1000,7 +1015,7 @@ namespace cube {
                                            nullptr, &graphicsPipeline));
     }
 
-    VkShaderModule AppBase::createShaderModule(const char* file_path) {
+    VkShaderModule AppBase::createShaderModule(const char *file_path) {
         const std::vector<uint8_t> &code = LoadBinaryFileToVector(file_path, assetManager);
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1059,51 +1074,18 @@ namespace cube {
         orientationChanged = false;
     }
 
-    void AppBase::recordCommandBuffer(VkCommandBuffer commandBuffer,
-                                      uint32_t imageIndex) {
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = 0;
-        beginInfo.pInheritanceInfo = nullptr;
-
-        VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo));
-
+    void
+    AppBase::beginRender(VkCommandBuffer commandBuffer, uint32_t imageIndex,
+                         VkClearValue clearColor) {
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = renderPass;
         renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
-
-        VkViewport viewport{};
-        viewport.width = (float)swapChainExtent.width;
-        viewport.height = (float)swapChainExtent.height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor{};
-        scissor.extent = swapChainExtent;
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
-        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
-                             VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          graphicsPipeline);
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipelineLayout, 0, 1, &descriptorSets[currentFrame],
-                                0, nullptr);
-
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),commandBuffers[currentFrame]); // GUI 렌더링
-
-        vkCmdEndRenderPass(commandBuffer);
-        VK_CHECK(vkEndCommandBuffer(commandBuffer));
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
     /*
@@ -1127,7 +1109,8 @@ namespace cube {
         return -1;
     }
 
-    void AppBase::createUniformBuffers() {
+    void AppBase::createUniformBuffers(std::vector<VkBuffer> &uniformBuffers,
+                                       std::vector<VkDeviceMemory> &uniformBuffersMemory) {
         VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
         uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1155,7 +1138,7 @@ namespace cube {
         VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool));
     }
 
-    void AppBase::createDescriptorSets() {
+    void AppBase::createDescriptorSets(vector<VkBuffer> uniformBuffers) {
         std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT,
                                                    descriptorSetLayout);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -1217,46 +1200,15 @@ namespace cube {
         vkBindBufferMemory(device, buffer, bufferMemory, 0);
     }
 
-    /*
- * getPrerotationMatrix handles screen rotation with 3 hardcoded rotation
- * matrices (detailed below). We skip the 180 degrees rotation.
- */
-    void getPrerotationMatrix(const VkSurfaceCapabilitiesKHR &capabilities,
-                              const VkSurfaceTransformFlagBitsKHR &pretransformFlag,
-                              glm::mat4 &mat, float ratio) {
-        // mat is initialized to the identity matrix
-        mat = glm::mat4(1.0f);
 
-        if (pretransformFlag & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
-            // mat is set to a 90 deg rotation matrix around Z axis
-            mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        }
-        else if (pretransformFlag & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
-            // mat is set to 270 deg rotation matrix around Z axis
-            mat = glm::rotate(mat, glm::radians(270.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        }
-
-        // scale by screen ratio
-        mat = glm::scale(mat, glm::vec3(1.0f, ratio, 1.0f));
-
-        // rotate 1 degree every function call.
-        static float currentAngleDegrees = 0.0f;
-        currentAngleDegrees += 1.0f;
-        mat = glm::rotate(mat, glm::radians(currentAngleDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
-    }
-
-    void AppBase::updateUniformBuffer(uint32_t currentImage) {
-        SwapChainSupportDetails swapChainSupport =
-                querySwapChainSupport(physicalDevice);
-        UniformBufferObject ubo{};
-        float ratio = (float)swapChainExtent.width / (float)swapChainExtent.height;
-        getPrerotationMatrix(swapChainSupport.capabilities, pretransformFlag,
-                             ubo.mvp, ratio);
+    void
+    AppBase::updateUniformBuffer(UniformBufferObject &ubo,
+                                 VkDeviceMemory &uniformBufferMemory) const {
         void *data;
-        vkMapMemory(device, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0,
+        vkMapMemory(device, uniformBufferMemory, 0, sizeof(ubo), 0,
                     &data);
         memcpy(data, glm::value_ptr(ubo.mvp), sizeof(glm::mat4));
-        vkUnmapMemory(device, uniformBuffersMemory[currentImage]);
+        vkUnmapMemory(device, uniformBufferMemory);
     }
 
 
@@ -1323,5 +1275,26 @@ namespace cube {
             assert(result == VK_SUCCESS);  // failed to present swap chain image!
         }
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void AppBase::PreUpdate() {
+        if (orientationChanged) {
+            onOrientationChange();
+        }
+
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE,
+                        UINT64_MAX);
+        VkResult result = vkAcquireNextImageKHR(
+                device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame],
+                VK_NULL_HANDLE, &imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+            return;
+        }
+        assert(result == VK_SUCCESS ||
+               result == VK_SUBOPTIMAL_KHR);  // failed to acquire swap chain image
+
+        SwapChainSupportDetails swapChainSupport =
+                querySwapChainSupport(physicalDevice);
     }
 }
