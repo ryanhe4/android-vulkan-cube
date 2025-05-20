@@ -10,6 +10,7 @@
 #include <android/native_window_jni.h>
 #include <game-activity/native_app_glue/android_native_app_glue.h>
 
+//#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -65,7 +66,9 @@ namespace cube {
     };
 
     struct UniformBufferObject {
-        glm::mat4 mvp;
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 projection;
     };
 
 
@@ -195,35 +198,18 @@ namespace cube {
         template<typename T_VERTEX>
         void createVertexBuffer(const vector<T_VERTEX> &vertices, VkBuffer &vertexBuffer,
                                 VkDeviceMemory &vertexBufferMemory) {
-            // 버퍼 생성 정보 설정
-            VkBufferCreateInfo bufferInfo{};
-            bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            bufferInfo.size = sizeof(T_VERTEX) * vertices.size(); // 총 버퍼 크기
-            bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; // 버텍스 버퍼 용도
-            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            VkDeviceSize bufferSize = sizeof(T_VERTEX) * vertices.size();
 
-            VK_CHECK(vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer));
-
-            VkMemoryRequirements memRequirements;
-            vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
-
-            VkMemoryAllocateInfo allocInfo{};
-            allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            allocInfo.allocationSize = memRequirements.size;
-            allocInfo.memoryTypeIndex =
-                    findMemoryType(memRequirements.memoryTypeBits,
-                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-            VK_CHECK(vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory));
-
-            vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+            createBuffer(bufferSize,VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory );
 
             void* data;
-            vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-            memcpy(data, vertices.data(), (size_t) bufferInfo.size);
+            vkMapMemory(device, vertexBufferMemory, 0,bufferSize, 0, &data);
+            memcpy(data, vertices.data(), (size_t) bufferSize);
             vkUnmapMemory(device, vertexBufferMemory);
         }
+
+        void createIndexBuffer(const vector<uint16_t> &indices, VkBuffer &m_indexBuffer, VkDeviceMemory &indexBufferMemory);
 
         void createGraphicsPipeline(VkShaderModule vertexShader, VkShaderModule pixelShader,
                                     VkVertexInputBindingDescription vertextInputBinding,

@@ -1207,7 +1207,7 @@ namespace cube {
         void *data;
         vkMapMemory(device, uniformBufferMemory, 0, sizeof(ubo), 0,
                     &data);
-        memcpy(data, glm::value_ptr(ubo.mvp), sizeof(glm::mat4));
+        memcpy(data, &ubo, sizeof(ubo));
         vkUnmapMemory(device, uniformBufferMemory);
     }
 
@@ -1296,5 +1296,17 @@ namespace cube {
 
         SwapChainSupportDetails swapChainSupport =
                 querySwapChainSupport(physicalDevice);
+    }
+
+    void AppBase::createIndexBuffer(const vector<uint16_t> &indices, VkBuffer &m_indexBuffer,
+                                    VkDeviceMemory &indexBufferMemory) {
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+        createBuffer(bufferSize,VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                                                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_indexBuffer, indexBufferMemory);
+
+        void* data;
+        vkMapMemory(device, indexBufferMemory, 0,bufferSize, 0, &data);
+        memcpy(data, indices.data(), (size_t) bufferSize);
+        vkUnmapMemory(device, indexBufferMemory);
     }
 }

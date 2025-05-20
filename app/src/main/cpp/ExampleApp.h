@@ -44,6 +44,10 @@ namespace cube {
 
         VkBuffer m_vertexBuffer;
         VkDeviceMemory m_vertexBufferMemory;
+
+        VkBuffer m_indexBuffer;
+        VkDeviceMemory m_indexBufferMemory;
+        int m_indexCount;
     };
 
 }

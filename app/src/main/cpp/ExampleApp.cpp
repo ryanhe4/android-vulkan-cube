@@ -15,27 +15,61 @@ namespace cube {
 
         const float scale = 1.0f;
 
-        // 윗면
-        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
+        // 앞면
+        positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
         positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
         positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
+
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        // 윗면
+        positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
         positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // 뒷면
+        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
+
+        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+        colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+
         normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
         normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
         normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
         normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
 
         // 아랫면
-
-
-        // 앞면
-
-
-        // 뒷면
+//        positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
+//        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
+//        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
+//        positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
+//
+//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
 
 
         // 왼쪽
@@ -52,7 +86,9 @@ namespace cube {
         }
 
         vector<uint16_t> indices = {
-                0, 1, 2, 0, 2, 3,  // 윗면
+                0, 1, 2, 0, 2, 3,  // 앞면
+                4, 5, 6, 4, 6, 7, // 윗면
+                8, 11, 10, 8, 10, 9 // 뒷면
         };
 
         return tuple{vertices, indices};
@@ -93,6 +129,10 @@ namespace cube {
 
         createVertexBuffer(vertices, m_vertexBuffer, m_vertexBufferMemory);
 
+        m_indexCount = indices.size();
+
+        createIndexBuffer(indices, m_indexBuffer, m_indexBufferMemory);
+
         createUniformBuffers(uniformBuffers, uniformBuffersMemory);
 
         // descriptorSets: uniformBuffer, Sampler, 혹은 Texture 등 셰이더 리소스 바인딩에 필요
@@ -130,12 +170,35 @@ namespace cube {
     }
 
     void ExampleApp::Update(float dt) {
-        float ratio = (float) swapChainExtent.width / (float) swapChainExtent.height;
 
+        static float rot = 0.0f;
+        rot += dt;
+
+        const float aspect = (float) swapChainExtent.width / (float) swapChainExtent.height;
         UniformBufferObject ubo{};
 
-        getPrerotationMatrix(pretransformFlag,
-                             ubo.mvp, ratio);
+        ubo.model =  glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.3f, -1.0f)) *
+                     glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                     glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
+
+        ubo.view = glm::lookAtLH(
+                glm::vec3(0.0f, 0.0f, 1.0f), // EyePosition
+                glm::vec3(0.0f, 0.0f, -1.0f),  // FocusPosition
+                glm::vec3(0.0f, -1.0f, 0.0f)   // UpDirection
+        );
+
+        // 프로젝션
+        if (m_usePerspectiveProjection) {
+            const float fovAngleY = glm::radians(70.0f);
+            ubo.projection =
+                    glm::perspectiveLH(fovAngleY, -aspect, 0.01f, 100.0f);
+        } else {
+            ubo.projection =
+                    glm::orthoLH(-aspect,aspect, 1.0f, -1.0f, 0.1f, 10.0f);
+        }
+
+//        getPrerotationMatrix(pretransformFlag,
+//                             ubo.mvp, ratio);
 
         updateUniformBuffer(ubo, uniformBuffersMemory[currentFrame]);
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -164,11 +227,20 @@ namespace cube {
 
         vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                           graphicsPipeline);
+
         vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 pipelineLayout, 0, 1, &descriptorSets[currentFrame],
                                 0, nullptr);
 
-        vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
+        VkBuffer vertexBuffers[] = {m_vertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(commandBuffers[currentFrame], m_indexBuffer, 0,
+                             VkIndexType::VK_INDEX_TYPE_UINT16);
+
+//        vkCmdDraw(commandBuffers[currentFrame], 3,1,0,0);
+        vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(m_indexCount), 1, 0, 0,
+                         0);
     }
 
     void ExampleApp::cleanup() {
