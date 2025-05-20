@@ -15,67 +15,91 @@ namespace cube {
 
         const float scale = 1.0f;
 
+        // 윗면
+        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+
         // 앞면
+        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+
+        // 왼쪽
+        positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+
+        // 뒷면
         positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
         positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
         positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
         positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
-
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        // 윗면
-        positions.push_back(glm::vec3(-1.0f, 1.0f, 1.0f) * scale);
-        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
-        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
-        positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-
-        // 뒷면
-        positions.push_back(glm::vec3(-1.0f, 1.0f, -1.0f) * scale);
-        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
-        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
-        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
-
-        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+        colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
         colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
         colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
 
         // 아랫면
-//        positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
-//        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
-//        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
-//        positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
-//
-//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-//        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-
-
-        // 왼쪽
-
+        positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
+        normals.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
 
         // 오른쪽
+        positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, -1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, 1.0f, 1.0f) * scale);
+        positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f) * scale);
+
+        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+        colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+
+        normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+        normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
 
         vector<Vertex> vertices;
         for (size_t i = 0; i < positions.size(); i++) {
@@ -86,9 +110,12 @@ namespace cube {
         }
 
         vector<uint16_t> indices = {
-                0, 1, 2, 0, 2, 3,  // 앞면
-                4, 5, 6, 4, 6, 7, // 윗면
-                8, 11, 10, 8, 10, 9 // 뒷면
+                0, 1, 2, 0, 2, 3,  // 윗면
+                4, 5, 6, 4, 6, 7,   // 앞면
+                8, 9, 10, 8, 10, 11,     // 옆면
+                12, 14, 13, 12, 15, 14, // 뒷면
+                16, 18, 17, 16, 19, 18,  // 아랫면
+                20, 21, 22, 20, 22, 23, // 오른면
         };
 
         return tuple{vertices, indices};
@@ -143,32 +170,6 @@ namespace cube {
         return true;
     }
 
-    /*
-    * getPrerotationMatrix handles screen rotation with 3 hardcoded rotation
-    * matrices (detailed below). We skip the 180 degrees rotation.
-    */
-    void getPrerotationMatrix(const VkSurfaceTransformFlagBitsKHR &pretransformFlag, glm::mat4 &mat,
-                              float ratio) {
-        // mat is initialized to the identity matrix
-        mat = glm::mat4(1.0f);
-
-        if (pretransformFlag & VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR) {
-            // mat is set to a 90 deg rotation matrix around Z axis
-            mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        } else if (pretransformFlag & VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR) {
-            // mat is set to 270 deg rotation matrix around Z axis
-            mat = glm::rotate(mat, glm::radians(270.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        }
-
-        // scale by screen ratio
-        mat = glm::scale(mat, glm::vec3(1.0f, ratio, 1.0f));
-
-        // rotate 1 degree every function call.
-        static float currentAngleDegrees = 0.0f;
-        currentAngleDegrees += 1.0f;
-        mat = glm::rotate(mat, glm::radians(currentAngleDegrees), glm::vec3(0.0f, 0.0f, 1.0f));
-    }
-
     void ExampleApp::Update(float dt) {
 
         static float rot = 0.0f;
@@ -177,24 +178,24 @@ namespace cube {
         const float aspect = (float) swapChainExtent.width / (float) swapChainExtent.height;
         UniformBufferObject ubo{};
 
-        ubo.model =  glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.3f, -1.0f)) *
-                     glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 1.0f, 0.0f)) *
-                     glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
+        ubo.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, -1.0f)) *
+                    glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                    glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
 
         ubo.view = glm::lookAtLH(
                 glm::vec3(0.0f, 0.0f, 1.0f), // EyePosition
                 glm::vec3(0.0f, 0.0f, -1.0f),  // FocusPosition
-                glm::vec3(0.0f, -1.0f, 0.0f)   // UpDirection
+                glm::vec3(0.0f, 1.0f, 0.0f)   // UpDirection
         );
 
         // 프로젝션
         if (m_usePerspectiveProjection) {
             const float fovAngleY = glm::radians(70.0f);
             ubo.projection =
-                    glm::perspectiveLH(fovAngleY, -aspect, 0.01f, 100.0f);
+                    glm::perspectiveLH(fovAngleY, aspect, 0.01f, 100.0f);
         } else {
             ubo.projection =
-                    glm::orthoLH(-aspect,aspect, 1.0f, -1.0f, 0.1f, 10.0f);
+                    glm::orthoLH(-aspect, aspect, -1.0f, 1.0f, 0.1f, 10.0f);
         }
 
 //        getPrerotationMatrix(pretransformFlag,
