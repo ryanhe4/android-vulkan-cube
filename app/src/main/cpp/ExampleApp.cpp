@@ -94,7 +94,7 @@ namespace cube {
         colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
         colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
         colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-        colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+        colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
 
         normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
         normals.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -178,28 +178,26 @@ namespace cube {
         const float aspect = (float) swapChainExtent.width / (float) swapChainExtent.height;
         UniformBufferObject ubo{};
 
-        ubo.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.3f, -1.0f)) *
-                    glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 1.0f, 0.0f)) *
-                    glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
+        ubo.model = glm::translate(glm::mat4(1.0f), m_modelTranslation) *
+                    glm::rotate(glm::mat4(1.0f), m_modelRotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) *
+                glm::rotate(glm::mat4(1.0f), m_modelRotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                glm::rotate(glm::mat4(1.0f), m_modelRotation.z, glm::vec3(0.0f, 0.0f, 1.0f)) *
+                    glm::scale(glm::mat4(1.0f), m_modelScaling);
 
         ubo.view = glm::lookAtLH(
-                glm::vec3(0.0f, 0.0f, 1.0f), // EyePosition
-                glm::vec3(0.0f, 0.0f, -1.0f),  // FocusPosition
-                glm::vec3(0.0f, 1.0f, 0.0f)   // UpDirection
+                m_viewEyePos, // EyePosition
+                m_viewEyeDir,  // FocusPosition
+                m_viewUp   // UpDirection
         );
 
         // 프로젝션
         if (m_usePerspectiveProjection) {
-            const float fovAngleY = glm::radians(70.0f);
             ubo.projection =
-                    glm::perspectiveLH(fovAngleY, aspect, 0.01f, 100.0f);
+                    glm::perspectiveLH(glm::radians(m_projFovAngleY), aspect, m_nearZ, m_farZ);
         } else {
             ubo.projection =
-                    glm::orthoLH(-aspect, aspect, -1.0f, 1.0f, 0.1f, 10.0f);
+                    glm::orthoLH(-aspect, aspect, -1.0f, 1.0f, m_nearZ, m_farZ);
         }
-
-//        getPrerotationMatrix(pretransformFlag,
-//                             ubo.mvp, ratio);
 
         updateUniformBuffer(ubo, uniformBuffersMemory[currentFrame]);
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -207,13 +205,28 @@ namespace cube {
 
     void ExampleApp::UpdateGUI() {
         ImGui::Checkbox("usePerspectiveProjection", &m_usePerspectiveProjection);
+
+        ImGui::SliderFloat3("m_modelTranslation", &m_modelTranslation.x, -2.0f, 2.0f);
+        ImGui::SliderFloat3("m_modelRotation(Rad)", &m_modelRotation.x, -3.14f, 3.14f);
+        ImGui::SliderFloat3("m_modelScaling", &m_modelScaling.x, 0.1f, 2.0f);
+
+        ImGui::SliderFloat3("m_viewEyePos", &m_viewEyePos.x, -4.0f, 4.0f);
+        ImGui::SliderFloat3("m_viewEyeDir", &m_viewEyeDir.x, -4.0f, 4.0f);
+        ImGui::SliderFloat3("m_viewUp", &m_viewUp.x, -2.0f, 2.0f);
+
+        ImGui::SliderFloat("m_projFovAngleY(Deg)", &m_projFovAngleY, 10.0f, 180.0f);
+        ImGui::SliderFloat("m_nearZ", &m_nearZ, 0.01f, 10.0f);
+        ImGui::SliderFloat("m_farZ", &m_farZ, 0.01f, 10.0f);
     }
 
     void ExampleApp::Render() {
 
         VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkClearValue clearDepthStencil = {};
+        clearDepthStencil.depthStencil.depth = 1.f;
+        clearDepthStencil.depthStencil.stencil = 0;
 
-        AppBase::beginRender(commandBuffers[currentFrame], imageIndex, clearColor);
+        AppBase::beginRender(commandBuffers[currentFrame], imageIndex, clearColor, clearDepthStencil);
         VkViewport viewport{};
         viewport.width = (float) swapChainExtent.width;
         viewport.height = (float) swapChainExtent.height;

@@ -183,7 +183,7 @@ namespace cube {
         void recreateSwapChain();
 
         void
-        beginRender(VkCommandBuffer commandBuffer, uint32_t imageIndex, VkClearValue clearColor);
+        beginRender(VkCommandBuffer commandBuffer, uint32_t imageIndex, VkClearValue clearColor, VkClearValue depthStencil);
 
         void onOrientationChange();
 

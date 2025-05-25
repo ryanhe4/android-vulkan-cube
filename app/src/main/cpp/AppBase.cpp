@@ -1076,15 +1076,17 @@ namespace cube {
 
     void
     AppBase::beginRender(VkCommandBuffer commandBuffer, uint32_t imageIndex,
-                         VkClearValue clearColor) {
+                         VkClearValue clearColor, VkClearValue clearDepthStencil) {
+        VkClearValue clearValues[2] = { clearColor, clearDepthStencil };
+
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = renderPass;
         renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
+        renderPassInfo.clearValueCount = 2;
+        renderPassInfo.pClearValues = clearValues;
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
