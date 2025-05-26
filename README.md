@@ -7,7 +7,16 @@
 1. ANDROID_NDK_HOME: ndk home root 설정
 2. VCPKG_ROOT: vcpkg hoom root 설정
 
-## VCPKG
+## VCPKG 설치
+
+- imgui 설치
+
 ~~~shell
 $ vcpkg install 'imgui[android-binding,vulkan-binding]:arm64-android'
+~~~
+
+- stb 설치
+
+~~~shell
+$ vcpkg install 'stb:arm64-android'
 ~~~

@@ -7,6 +7,9 @@
 
 #include "AppBase.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 namespace cube {
 
     AppBase *g_appBase = nullptr;

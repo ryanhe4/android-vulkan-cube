@@ -52,9 +52,9 @@ namespace cube {
         glm::vec3 m_modelTranslation = glm::vec3(0.0f);
         glm::vec3 m_modelRotation = glm::vec3(0.0f);
         glm::vec3 m_modelScaling = glm::vec3(0.25f);
-        glm::vec3 m_viewEyePos = {0.0f, 0.0f, -2.0f};
+        glm::vec3 m_viewEyePos = {0.0f, 0.0f, 2.0f};
         glm::vec3 m_viewEyeDir = {0.0f, 0.0f, -1.0f};
-        glm::vec3 m_viewUp = {0.0f, 1.0f, 0.0f};
+        glm::vec3 m_viewUp = {0.0f, -1.0f, 0.0f};
         float m_projFovAngleY = 70.0f;
         float m_nearZ = 0.01f;
         float m_farZ = 100.0f;

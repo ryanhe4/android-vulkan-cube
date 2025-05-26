@@ -20,6 +20,8 @@ project(hellovkjni)
 # Include the GameActivity static lib to the project.
 find_package(game-activity REQUIRED CONFIG)
 find_package(imgui CONFIG REQUIRED)
+find_package(Stb REQUIRED)
+
 set(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} -u \
     Java_com_google_androidgamesdk_GameActivity_initializeNativeCode")
@@ -42,6 +44,7 @@ add_library(${PROJECT_NAME} SHARED
 add_subdirectory(${THIRD_PARTY_DIR}/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+     ${Stb_INCLUDE_DIR}
     ${THIRD_PARTY_DIR}/glm/glm)
 
 # add lib dependencies
